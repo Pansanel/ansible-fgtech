@@ -4,45 +4,43 @@
 # DEVELOPMENT ENVIRONMENT
 # =============================================
 [dev]
-dev-web-01.example.com
-dev-db-01.example.com
+5.home
+6.home
 
 # Variables specific to the dev environment
 [dev:vars]
 environment_name=development
-ansible_user=dev_user
-api_url=http://dev.api.example.com
-
-
+ansible_user=root
+ansible_ssh_private_key=/home/docke/.ssh/id_rsa
 # =============================================
 # STAGING ENVIRONMENT
 # =============================================
 [staging]
-staging-web-01.example.com
-staging-web-02.example.com
-staging-db-01.example.com
+11.home
+12.home
+13.home
 
 # Variables specific to the staging environment
 [staging:vars]
 environment_name=staging
-ansible_user=staging_user
-api_url=https://staging.api.example.com
+ansible_user=root
+ansible_ssh_private_key=/home/docke/.ssh/id_rsa
 
 
 # =============================================
 # PRODUCTION ENVIRONMENT
 # =============================================
 [prod]
-prod-web-01.example.com
-prod-web-02.example.com
-prod-db-01.example.com
-prod-lb-01.example.com
+30.home
+31.home
+32.home
+33.home
 
 # Variables specific to the prod environment
 [prod:vars]
 environment_name=production
-ansible_user=prod_user
-api_url=https://api.example.com
+ansible_user=root
+ansible_ssh_private_key=/home/ubuntu/.ssh/id_rsa
 
 
 # =============================================
@@ -52,18 +50,20 @@ api_url=https://api.example.com
 # This is useful for running role-specific playbooks.
 # Note the use of ranges to simplify listing.
 [webservers]
-dev-web-01.example.com
-staging-web-[01:02].example.com
-prod-web-[01:02].example.com
+6.home
+12.home
+33.home
 
 [dbservers]
-dev-db-01.example.com
-staging-db-01.example.com
-prod-db-01.example.com
+5.home
+13.home
+31.home
 
 [loadbalancers]
-prod-lb-01.example.com
+32.home
 
+[monitoring]
+30.home
 
 # =============================================
 # PARENT GROUPS (using :children)

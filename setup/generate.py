@@ -2,6 +2,7 @@
 import subprocess
 import sys
 import os
+import time  # Import the time module
 
 # --- Configuration ---
 NUM_CONTAINERS = 50
@@ -118,7 +119,6 @@ def main():
             success, _ = run_command(docker_run_command)
             if not success:
                 print(f"Failed to create container '{container_name}'. Stopping script.")
-                # Optional: decide if you want to stop or continue on failure
                 continue
 
                 # 3. Get the container's IP address
@@ -132,8 +132,11 @@ def main():
         # 4. Update the /etc/hosts file
         if not update_hosts_file(ip_address, hostname):
             print(f"Failed to update hosts file for '{hostname}'.")
-            # You might want to stop the script here or clean up the created container
-            # For now, we'll just continue to the next one.
+            continue
+
+        # 5. Add a delay to be gentle on the Docker daemon
+        print("Pausing for 1 second to avoid overloading the Docker daemon...")
+        time.sleep(5)
 
     print(f"\n--- Script finished. ---")
     # Final check using the quiet flag as requested

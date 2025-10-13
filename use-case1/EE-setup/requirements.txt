@@ -1,3 +1,11 @@
 # Fichier requirements.txt
-# Nous installons la version exacte d'Ansible requise
+# Ansible 2.9.13 doit être épinglé
 ansible==2.9.13
+
+# Dépendances compatibles Python 2.7 pour Ansible 2.9
+# Jinja2 2.11.x est la dernière version qui supporte Python 2.7
+jinja2==2.11.3
+# MarkupSafe (dépendance de Jinja2)
+markupsafe==1.1.1
+# setuptools (nécessaire pour la construction de paquets)
+setuptools==44.1.1

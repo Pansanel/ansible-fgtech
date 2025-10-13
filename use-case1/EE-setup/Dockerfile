@@ -1,6 +1,11 @@
 # Base : utiliser une image CentOS 7 minimaliste
 FROM centos:7
 
+
+RUN sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo \
+    && sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo \
+    && sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
+
 # Installer les dépendances système nécessaires
 RUN yum install -y \
     python \
@@ -14,6 +19,8 @@ RUN yum install -y \
     bzip2 \
     shadow-utils \
     && yum clean all
+
+RUN yum groupinstall -y "Development tools"
 
 # S'assurer que 'pip' utilise la bonne version de Python (Python 2.7.5 est le Python par défaut sur CentOS 7)
 RUN pip install --upgrade pip

@@ -1,13 +1,13 @@
-# Fichier requirements.txt
-# Ansible 2.9.13 doit être épinglé
-ansible==2.9.13
+# requirements.txt
+# Core Ansible
+ansible-core
+ansible-runner
 
-# Dépendances compatibles Python 2.7 pour Ansible 2.9
-# Jinja2 2.11.x est la dernière version qui supporte Python 2.7
-jinja2==2.11.3
-# MarkupSafe (dépendance de Jinja2)
-markupsafe==1.1.1
-# setuptools (nécessaire pour la construction de paquets)
-setuptools==44.1.1
-# Pip doit également être limité pour éviter les conflits
-pip==20.3.4
+# Testing Tools (Modern Dependency List)
+tox
+molecule
+ansible-lint
+testinfra
+
+# Molecule Driver (necessary for Molecule to provision containers)
+docker

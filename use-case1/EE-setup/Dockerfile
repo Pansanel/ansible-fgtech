@@ -1,55 +1,47 @@
-# Base : utiliser une image CentOS 7 minimaliste
-FROM centos:7
+# Dockerfile DinD pour AWX (AlmaLinux 9) avec Systemd
+FROM almalinux:9
 
+# 1. Définitions d'environnement et PATH
+ENV container docker \
+    LANG='en_US.utf8' \
+    LC_ALL='en_US.utf8' \
+    PATH="/usr/local/bin:/usr/bin:$PATH" \
+    DOCKER_CONTENT_TRUST=0
 
-RUN sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo \
-    && sed -i 's/^#.*baseurl=http/baseurl=http/g' /etc/yum.repos.d/*.repo \
-    && sed -i 's/^mirrorlist=http/#mirrorlist=http/g' /etc/yum.repos.d/*.repo
+# 2. Installation des dépendances système, systemd, et Docker
+RUN dnf -y update \
+    # 🚨 CORRECTION: Installer 'dnf-utils' (qui fournit 'config-manager')
+    && dnf install -y python3-pip python3-devel gcc git tar unzip wget procps initscripts dnf-utils \
+    # Configuration du dépôt Docker
+    && dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo \
+    # Installation des paquets Docker
+    && dnf install -y docker-ce docker-ce-cli containerd.io \
+    && dnf clean all
 
-# Installer les dépendances système nécessaires
-RUN yum install -y \
-    python \
-    python-devel \
-    python-pip \
-    gcc \
-    git \
-    sudo \
-    which \
-    tar \
-    bzip2 \
-    shadow-utils \
-    && yum clean all
+# 3. Création de l'utilisateur AWX (UID 1000) et configuration Systemd
+RUN groupadd -g 1000 awx \
+    && useradd -u 1000 -g awx -m -s /bin/bash awx \
+    && mkdir -p /opt/app-root/src \
+    && chown 1000:1000 /opt/app-root/src \
+    && usermod -aG docker awx \
+    # Nettoyage minimal pour systemd (nécessaire pour éviter les conflits de PID 1)
+    && (cd /lib/systemd/system/sysinit.target.wants/;\
+    for i in *; do [ $i = systemd-tmpfiles-setup.service ] || rm -f $i; done) \
+    && rm -f /lib/systemd/system/multi-user.target.wants/* \
+    && rm -f /etc/systemd/system/*.wants/*
 
-RUN yum groupinstall -y "Development tools"
+# 4. Installation des dépendances Python (Ansible, Tox, Molecule)
+USER awx
+WORKDIR /opt/app-root/src
+RUN pip3 install --no-cache-dir \
+    ansible-core \
+    ansible-runner \
+    tox \
+    molecule \
+    ansible-lint \
+    testinfra \
+    docker
 
-RUN /usr/bin/python -m pip install --upgrade \
-    pip==20.3.4 \
-    setuptools==44.1.1
-
-
-# S'assurer que 'pip' utilise la bonne version de Python (Python 2.7.5 est le Python par défaut sur CentOS 7)
-RUN pip install --upgrade pip
-
-# Installer les dépendances de ansible-builder (non nécessaire pour l'exécution, mais bonne pratique)
-# et les outils d'Ansible Runner
-RUN pip install "ansible-runner"
-
-# --- Préparation pour Ansible 2.9.13 ---
-# Ansible 2.9.13 sera installé dans requirements.txt
-
-# Créer un répertoire de travail
-WORKDIR /usr/local/bin
-
-# Définir l'utilisateur d'exécution pour AWX (par défaut : 1000)
-# AWX/Ansible Automation Platform exécute les travaux en tant qu'utilisateur non root.
-RUN groupadd -r ansible && useradd -r -g ansible -u 1000 ansible
-
-# Définir l'utilisateur par défaut dans l'image
-USER 1000
-
-# Définir des variables d'environnement importantes
-ENV ANSIBLE_PYTHON_INTERPRETER="/usr/bin/python"
-ENV PATH="/usr/local/bin:$PATH"
-
-# (Vous construirez l'image avec `ansible-builder build`)
-# L'étape finale d'installation d'Ansible se fait via requirements.txt
+# 5. Point d'entrée pour le mode Systemd (pour PID 1)
+USER root
+CMD ["/usr/sbin/init"]

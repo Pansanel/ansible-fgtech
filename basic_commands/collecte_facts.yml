@@ -24,17 +24,20 @@
       register: python_raw_output
       when:
         - '"centos7" and "centos7-remote"  in group_names'
+
     - name: Afficher le résultat de l'exécution (si la tâche a été jouée)
       ansible.builtin.debug:
           msg: "Sortie du script Python sur {{ inventory_hostname }} : {{ python_raw_output.stdout }}"
       when:
         - '"centos7" and "centos7-remote" in group_names'
         - python_raw_output.stdout is defined and python_raw_output.stdout | length > 0
+
     - name: Playbook sur centos7
       ansible.builtin.raw: cd /opt/app_config && ansible-playbook create_file.yml
       register: python_raw_output
       when:
          - '"centos7" and "centos7-remote" in group_names'
+
     - name: Afficher le résultat de l'exécution (si la tâche a été jouée)
       ansible.builtin.debug:
         msg: "Sortie du script Python sur {{ inventory_hostname }} : {{ python_raw_output.stdout }}"

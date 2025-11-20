@@ -1,6 +1,6 @@
 ---
 - name: Ensure Postgresql users are present
-  postgresql_user:
+  community.general.postgresql_user:
     name: "{{ item_name }}"
     password: "{{ item.password | default(omit}}"
     encrypted: "{{ item.encrypted | default(omit}}"

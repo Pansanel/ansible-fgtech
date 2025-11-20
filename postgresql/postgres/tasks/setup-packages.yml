@@ -1,0 +1,10 @@
+---
+- name: Check if postgresql packages are installed
+  package:
+    name: "{{ postgresql_packages }}"
+    state: present
+
+- name: Install python packages for PostgreSQL
+  package:
+    name: "{{ postgresql_python_library }}"
+    state: present
